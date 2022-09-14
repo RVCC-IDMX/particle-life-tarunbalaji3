@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Particle Life</title>
+    <style>
+      canvas {
+        border: 1px dashed black;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="life" width="500" height="500"></canvas>
+
+    <script>
+      //Grab Canvas
+
+      let canvas = document.querySelector('#life');
+      let c = canvas.getContext('2d');
+
+      let draw = (x, y, color, size) => {
+        c.fillStyle = color;
+        c.fillRect(x, y, size, size);
+      };
+
+      let atoms = [];
+
+      let atom = (x, y, c) => {
+        return {
+          x: x,
+          y: y,
+          color: c,
+          vx: 0,
+          vy: 0,
+        };
+      };
+
+      let randomCoord = () => {
+        return Math.random() * 400 + 50;
+      };
+
+      let create = (number, color) => {
+        let group = [];
+        for (let i = 0; i < number; i++) {
+          let a = atom(randomCoord(), randomCoord(), color);
+          group.push(a);
+          atoms.push(a);
+          console.log(a);
+        }
+        return group;
+      };
+
+      let rule = (group1, group2, g) => {
+        for (let i = 0; i < group1.length; i++) {
+          let fx = 0;
+          let fy = 0;
+          let a = group1[i];
+          for (let j = 0; j < group2.length; j++) {
+            let b = group2[j];
+            let dx = a.x - b.x;
+            let dy = a.y - b.y;
+            let d = Math.sqrt(dx ** 2 + dy ** 2);
+            if (d > 0 && d < 80) {
+              let f = g / d;
+              fx += f * dx;
+              fy += f * dy;
+            }
+          }
+          a.vx = (a.vx + fx) * 0.5;
+          a.vy = (a.vy + fy) * 0.5;
+          // Collison code used from Collision Detection with Walls | HTML Game Physics | Tutorial for HTML Canvas (with JavaScript) by The Pentamollis Project
+          a.x += a.vx;
+          if (a.x >= 500 || a.x <= 0) {
+            a.vx = -a.vx;
+          }
+          a.y += a.vy;
+          if (a.y >= 500 || a.y <= 0) {
+            a.vy = -a.vy;
+          }
+        }
+      };
+
+      let green = create(100, 'green');
+      let red = create(100, 'red');
+      let blue = create(100, 'blue');
+      let orange = create(100, 'orange');
+
+      let drawAll = () => {
+        for (i in atoms) draw(atoms[i].x, atoms[i].y, atoms[i].color, 3);
+      };
+
+      let loop = () => {
+        //Update Model
+        rule(green, green, -0.05);
+        rule(red, blue, 0.08);
+        rule(orange, blue, -0.09);
+        rule(blue, blue, -0.03);
+        //Clear screen
+        c.clearRect(0, 0, 500, 500);
+        drawAll();
+        requestAnimationFrame(loop);
+      };
+
+      loop();
+    </script>
+  </body>
+</html>
